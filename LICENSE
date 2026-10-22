@@ -19,27 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-================================================================================
-
-THIRD-PARTY ASSETS & DEPENDENCIES NOTICE
-
-This project includes third-party assets and dependencies that are subject to
-their own respective licenses. The MIT license above applies ONLY to the
-original source code of this project authored by [你的姓名/组织名].
-
-1. MiSans Font
-   - Location: src/MiSans/
-   - License: MiSans Font Intellectual Property License Agreement
-   - Copyright: © Xiaomi Inc.
-   - Notice: Use of MiSans is subject to its custom license. Redistribution
-     of the font file itself is restricted; see src/MiSans/LICENSE-MiSans.txt
-     for full terms.
-
-2. Third-Party Code Dependencies (mdui, Zustand, pdfmake, React, Vite, etc.)
-   - License: MIT / Apache-2.0 / BSD-3-Clause
-   - Notice: Full text of all third-party code licenses is automatically
-     generated at build time and available in:
-     dist/THIRD_PARTY_LICENSES.txt
-     For source-only users: run `pnpm build` to generate this file, or
-     refer to each package's LICENSE file in node_modules/.
