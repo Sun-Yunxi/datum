@@ -1,0 +1,1522 @@
+/* ========== MiSans Local Fonts ==========
+   仅声明界面实际使用的字重（400 常规 / 500 中黑）：
+   未使用的 600/700 字重已移除，避免把整份 CJK 字体打进产物（每个约 4.9MB）。 */
+@font-face {
+  font-family: 'MiSans';
+  src: url('./MiSans/woff2/MiSans-Normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MiSans';
+  src: url('./MiSans/woff2/MiSans-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ========== Material Design 3 Design Tokens ========== */
+:root {
+  /* Color - Primary */
+  --md-primary: 103, 80, 164;
+  --md-on-primary: 255, 255, 255;
+  --md-primary-container: 234, 221, 255;
+  --md-on-primary-container: 33, 0, 94;
+
+  /* Color - Secondary */
+  --md-secondary-container: 234, 221, 255;
+  --md-on-secondary-container: 29, 25, 43;
+
+  /* Color - Surface */
+  --md-surface: 254, 247, 255;
+  --md-surface-dim: 222, 216, 225;
+  --md-surface-bright: 254, 247, 255;
+  --md-surface-container-lowest: 255, 255, 255;
+  --md-surface-container-low: 247, 242, 250;
+  --md-surface-container: 243, 237, 247;
+  --md-surface-container-high: 236, 230, 240;
+  --md-surface-container-highest: 230, 224, 233;
+
+  /* Color - On Surface */
+  --md-on-surface: 28, 27, 31;
+  --md-on-surface-variant: 73, 69, 78;
+
+  /* Color - Outline */
+  --md-outline: 121, 116, 126;
+  --md-outline-variant: 196, 199, 197;
+
+  /* Color - Error */
+  --md-error: 179, 38, 30;
+  --md-on-error: 255, 255, 255;
+  --md-error-container: 249, 222, 220;
+
+  /* Color - Shadow */
+  --md-shadow: 0, 0, 0;
+
+  /* Elevation */
+  --md-elevation-0: none;
+  --md-elevation-1: 0 1px 2px 0 rgba(var(--md-shadow), 0.3), 0 1px 3px 1px rgba(var(--md-shadow), 0.15);
+  --md-elevation-2: 0 1px 2px 0 rgba(var(--md-shadow), 0.3), 0 2px 6px 2px rgba(var(--md-shadow), 0.15);
+  --md-elevation-3: 0 1px 3px 0 rgba(var(--md-shadow), 0.3), 0 4px 8px 3px rgba(var(--md-shadow), 0.15);
+
+  /* Shape */
+  --md-shape-extra-small: 4px;
+  --md-shape-small: 8px;
+  --md-shape-medium: 12px;
+  --md-shape-large: 16px;
+  --md-shape-extra-large: 28px;
+  --md-shape-full: 9999px;
+
+  /* State Layer Opacity */
+  --md-state-hover: 0.08;
+  --md-state-focus: 0.12;
+  --md-state-pressed: 0.12;
+
+  /* Typography */
+  --md-typescale-headline-small: 1.5rem;
+  --md-typescale-title-large: 1.375rem;
+  --md-typescale-title-medium: 1.125rem;
+  --md-typescale-title-small: 1rem;
+  --md-typescale-label-large: 0.9375rem;
+  --md-typescale-label-medium: 0.875rem;
+  --md-typescale-label-small: 0.8125rem;
+  --md-typescale-body-large: 1rem;
+  --md-typescale-body-medium: 0.9375rem;
+  --md-typescale-body-small: 0.875rem;
+
+  /* Spacing */
+  --md-spacing-xs: 4px;
+  --md-spacing-sm: 8px;
+  --md-spacing-md: 16px;
+  --md-spacing-lg: 24px;
+  --md-spacing-xl: 32px;
+
+  /* Field height */
+  --md-field-height: 56px;
+  --md-field-height-dense: 48px;
+
+  /* Transition */
+  --md-transition: 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ========== Reset & Base ========== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "MiSans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: var(--md-typescale-body-medium);
+  line-height: 1.2;
+  color: rgb(var(--md-on-surface));
+  background: rgb(var(--md-surface));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 收紧纯文本 line-height，缩小 selection 高亮高度 */
+/* !important 覆盖各处 class 级别的显式 line-height */
+p, span, label, h1, h2, h3, h4, h5, h6 {
+  line-height: 1.25 !important;
+}
+
+/* form control 恢复默认行高，防止文字裁切/错位 */
+/* !important 覆盖 .paper-settings__field select / .element-panel__field input 等 */
+input, select, textarea, button {
+  line-height: normal !important;
+}
+
+/* ========== App Layout ========== */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: rgb(var(--md-surface));
+}
+
+/* ---- Top App Bar ---- */
+.app__header {
+  background: rgb(var(--md-surface-container));
+  border-bottom: 1px solid rgb(var(--md-outline-variant));
+  padding: 0 var(--md-spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.app__header h1 {
+  font-size: var(--md-typescale-headline-small);
+  font-weight: 400;
+  color: rgb(var(--md-on-surface));
+  letter-spacing: 0;
+  line-height: 2;
+}
+
+.app__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--md-spacing-md);
+}
+
+/* ---- Main Content ---- */
+.app__main {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  padding: var(--md-spacing-md);
+  overflow-y: auto;
+}
+
+.app__sidebar {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-spacing-md);
+}
+
+/* ========== Buttons (mdui-button 集成) ==========
+   外观、颜色、涟漪、禁用态均由 mdui 的 variant 与设计令牌负责，
+   这里只做尺寸/布局适配，避免与组件内部样式冲突。 */
+
+/* 顶部「下载 PDF」按钮：默认尺寸即可，仅保证不被压缩 */
+.app__download {
+  flex-shrink: 0;
+}
+
+/* ---- About / Footer ---- */
+.app__footer {
+  border-top: 1px solid rgb(var(--md-outline-variant));
+  background: rgb(var(--md-surface-container));
+  padding: var(--md-spacing-lg) var(--md-spacing-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--md-spacing-sm);
+  text-align: center;
+}
+
+.app__footer-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--md-spacing-sm);
+}
+
+.app__footer-logo {
+  width: 24px;
+  height: 24px;
+}
+
+.app__footer-name {
+  font-size: var(--md-typescale-title-small);
+  font-weight: 500;
+  color: rgb(var(--md-on-surface));
+}
+
+.app__footer-version {
+  padding: 0 var(--md-spacing-sm);
+  border: 1px solid rgb(var(--md-outline-variant));
+  border-radius: var(--md-shape-full);
+  font-size: var(--md-typescale-label-small);
+  color: rgb(var(--md-on-surface-variant));
+}
+
+.app__footer-meta {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--md-spacing-xs) var(--md-spacing-md);
+  font-size: var(--md-typescale-body-small);
+  color: rgb(var(--md-on-surface-variant));
+}
+
+/* 「添加模块」按钮：与左侧下拉框等高（56px） */
+.element-add-bar__btn {
+  height: 56px;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+/* mdui 图标槽内的 SVG 保持固定尺寸 */
+.element-add-bar__btn::part(icon) {
+  font-size: 0;
+  margin-right: 8px;
+}
+
+/* 「选择文件」按钮：靠右，样式对齐顶部「PDF 输出」按钮（filled） */
+.element-panel__upload {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.element-panel__upload-note {
+  margin: 0;
+}
+
+.element-panel__upload-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* 无标签的上传行：收窄行高，只容纳按钮 */
+.element-panel__field--upload {
+  min-height: 0;
+}
+
+/* ========== Section Cards (MD3 Surface Container) ========== */
+.preset-templates,
+.paper-settings,
+.element-group {
+  --md-field-bg: rgb(var(--md-surface-container-low));
+  background: rgb(var(--md-surface-container-low));
+  border: 1px solid rgb(var(--md-outline-variant));
+  border-radius: var(--md-shape-medium);
+  padding: var(--md-spacing-lg);
+}
+
+/* Section titles */
+.preset-templates h3,
+.paper-settings h3,
+.element-panel h3 {
+  font-size: var(--md-typescale-title-large);
+  font-weight: 400;
+  margin-bottom: var(--md-spacing-lg);
+  color: rgb(var(--md-on-surface));
+  line-height: 1.75;
+  letter-spacing: 0;
+}
+
+/* ========== Font Select（「文字」模块内的字体选择控件） ========== */
+/* 隐私提示小字：与「选择文件」按钮同行，占据左侧剩余空间 */
+.font-select__privacy {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--md-typescale-body-small);
+  color: rgb(var(--md-on-surface-variant));
+  line-height: 1.4;
+  letter-spacing: 0.00625rem;
+}
+
+/* 已上传字体列表 */
+.font-select__list {
+  list-style: none;
+  margin: 0 0 var(--md-spacing-md);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-spacing-xs);
+}
+
+.font-select__item {
+  display: flex;
+  align-items: center;
+  gap: var(--md-spacing-sm);
+  padding: 2px 4px 2px var(--md-spacing-sm);
+  border: 1px solid rgb(var(--md-outline-variant));
+  border-radius: var(--md-shape-small);
+  background: rgb(var(--md-surface-container));
+}
+
+.font-select__name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--md-typescale-body-medium);
+  color: rgb(var(--md-on-surface));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.font-select__meta {
+  flex-shrink: 0;
+  font-size: var(--md-typescale-label-small);
+  color: rgb(var(--md-on-surface-variant));
+}
+
+.font-select__remove {
+  flex-shrink: 0;
+  color: rgb(var(--md-error));
+}
+
+/* 字体加载失败提示对话框顶部的 warning 图标（@mdui/icons） */
+.datum-dialog__icon {
+  color: rgb(var(--md-error));
+}
+
+/* ========== Snackbar（轻量消息提示） ========== */
+/* 字号由 body-medium 提升为 body-large（MD3 令牌），使提示文字适当增大 */
+mdui-snackbar {
+  --mdui-typescale-body-medium-size: var(--mdui-typescale-body-large-size);
+  --mdui-typescale-body-medium-weight: var(--mdui-typescale-body-large-weight);
+  --mdui-typescale-body-medium-tracking: var(--mdui-typescale-body-large-tracking);
+  --mdui-typescale-body-medium-line-height: var(--mdui-typescale-body-large-line-height);
+}
+
+/* ========== Preset Templates ========== */
+/* 折叠头部：mdui-collapse-item 的 header 插槽内容，整行可点击 */
+.preset-templates__header {
+  display: flex;
+  align-items: center;
+  gap: var(--md-spacing-sm);
+  /* 水平内边距为 0，使标题文字与卡片内容左缘（及其他区块标题）对齐 */
+  padding: var(--md-spacing-sm) 0;
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--md-shape-small);
+  transition: background-color var(--mdui-motion-duration-short3) var(--mdui-motion-easing-standard);
+}
+
+.preset-templates__header:hover {
+  background: rgba(var(--md-on-surface), var(--md-state-hover));
+}
+
+.preset-templates__header-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--md-typescale-title-large);
+  font-weight: 400;
+  color: rgb(var(--md-on-surface));
+  letter-spacing: 0;
+}
+
+.preset-templates__chevron {
+  width: 24px;
+  height: 24px;
+  color: rgb(var(--md-on-surface-variant));
+  transition: transform var(--mdui-motion-duration-short4) var(--mdui-motion-easing-emphasized-decelerate);
+  flex-shrink: 0;
+}
+
+.preset-templates__chevron--open {
+  transform: rotate(180deg);
+}
+
+/* 折叠正文：高度动画由 mdui-collapse-item 负责，这里只补头部与网格的间距 */
+.preset-templates__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--md-spacing-sm);
+  padding-top: var(--md-spacing-md);
+}
+
+/* 模板卡片：mdui outlined 按钮，占满网格单元并支持长文本省略 */
+.preset-templates__btn {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 40px;
+  font-size: var(--md-typescale-label-medium);
+}
+
+.preset-templates__btn::part(label) {
+  display: block;
+  width: 100%;
+  padding: 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========== Paper Settings ========== */
+.paper-settings__field {
+  margin-bottom: var(--md-spacing-lg);
+}
+
+.paper-settings__field label {
+  display: block;
+  font-size: var(--md-typescale-label-large);
+  color: rgb(var(--md-on-surface-variant));
+  margin-bottom: 6px;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: 0.00625rem;
+}
+
+/* MD3 Outlined text fields & ExposedDropdownMenuBox */
+.paper-settings__field select,
+.paper-settings__field input[type="number"],
+.paper-settings__field input[type="text"] {
+  width: 100%;
+  height: var(--md-field-height);
+  padding: 0 16px;
+  border: 1px solid rgb(var(--md-outline));
+  border-radius: var(--md-shape-extra-small);
+  font-family: inherit;
+  font-size: var(--md-typescale-body-large);
+  color: rgb(var(--md-on-surface));
+  background: transparent;
+  transition: border-color var(--md-transition), box-shadow var(--md-transition);
+  outline: none;
+  line-height: var(--md-field-height);
+  letter-spacing: 0.009375rem;
+}
+
+.paper-settings__field select:hover,
+.paper-settings__field input[type="number"]:hover,
+.paper-settings__field input[type="text"]:hover {
+  border-color: rgb(var(--md-on-surface));
+}
+
+.paper-settings__field select:focus,
+.paper-settings__field input[type="number"]:focus,
+.paper-settings__field input[type="text"]:focus {
+  border-color: rgb(var(--md-primary));
+  border-width: 2px;
+  padding: 0 15px;
+  box-shadow: none;
+}
+
+/* ExposedDropdownMenuBox select */
+.paper-settings__field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%2349454e' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 44px;
+  cursor: pointer;
+}
+
+.paper-settings__field select:focus {
+  padding-right: 43px;
+}
+
+/* Color input */
+.paper-settings__field input[type="color"] {
+  width: var(--md-field-height);
+  height: var(--md-field-height);
+  border: 1px solid rgb(var(--md-outline));
+  border-radius: var(--md-shape-extra-small);
+  padding: 8px;
+  cursor: pointer;
+  background: transparent;
+  outline: none;
+}
+
+/* Margin Outlined Text Field (MD3, from demo) */
+/* 组标题与字段间距需容纳浮动标签突出边框顶部的 6px */
+.paper-settings__field .paper-settings__label {
+  margin-bottom: 20px;
+}
+
+.paper-settings__outlined-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--md-field-height);
+  /* 原 stepper-value(80px) + 4 个 stepper-btn(40px) */
+  width: 240px;
+  border: 1px solid rgb(var(--md-outline));
+  border-radius: var(--md-shape-extra-small);
+  background: transparent;
+  transition: border-color var(--md-transition);
+}
+
+.paper-settings__outlined-field:hover {
+  border-color: rgb(var(--md-on-surface));
+}
+
+.paper-settings__outlined-field:focus-within {
+  border-width: 2px;
+  border-color: rgb(var(--md-primary));
+}
+
+.paper-settings__field .paper-settings__outlined-field input {
+  width: 100%;
+  height: 100%;
+  padding: 0 16px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--md-typescale-body-large);
+  color: rgb(var(--md-on-surface));
+}
+
+/* 聚焦描边 1px→2px 时缩小 padding 补偿，防止文字位移（与项目其他文本框一致） */
+.paper-settings__outlined-field:focus-within input {
+  padding: 0 15px;
+}
+
+.paper-settings__outlined-field label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgb(var(--md-surface-container-low));
+  padding: 0 4px;
+  color: rgb(var(--md-on-surface-variant));
+  font-size: var(--md-typescale-body-large);
+  pointer-events: none;
+  transition: all var(--md-transition);
+}
+
+.paper-settings__outlined-field:focus-within label,
+.paper-settings__outlined-field input:not(:placeholder-shown) ~ label {
+  top: 0;
+  transform: translateY(-50%) scale(0.85);
+  color: rgb(var(--md-primary));
+}
+
+/* Toggle row in paper settings (aligns with 56px field height) */
+.paper-settings__toggle-row {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+}
+
+/* Margin grid */
+.paper-settings__margin-grid {
+  display: grid;
+  /* 固定列宽消除 1fr 轨道内空隙；行距 20px 容纳浮动标签突出边框的 6px */
+  grid-template-columns: repeat(2, 240px);
+  gap: 20px 16px;
+}
+
+/* ========== Collapse (高度自适应展开/收起) ========== */
+.md3-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--md-transition);
+}
+
+.md3-collapse--open {
+  grid-template-rows: 1fr;
+}
+
+.md3-collapse__inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ========== MD3 Switch (mdui-switch) ========== */
+/* 避免在 flex 行内被压缩变形 */
+.element-panel__field > mdui-switch {
+  flex-shrink: 0;
+}
+
+/* ========== Element Panel ========== */
+.element-group__title {
+  font-size: var(--md-typescale-title-small);
+  font-weight: 500;
+  margin-bottom: var(--md-spacing-sm);
+  color: rgb(var(--md-on-surface));
+  padding-bottom: var(--md-spacing-sm);
+  border-bottom: 1px solid rgb(var(--md-outline-variant));
+  letter-spacing: 0.00625rem;
+}
+
+.element-group__count {
+  font-size: var(--md-typescale-body-medium);
+  color: rgb(var(--md-on-surface-variant));
+  font-weight: 400;
+}
+
+/* Element form fields */
+.element-panel__field {
+  margin-bottom: var(--md-spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--md-spacing-sm);
+  min-height: 56px;
+}
+
+.element-panel__field label {
+  font-size: var(--md-typescale-body-medium);
+  color: rgb(var(--md-on-surface-variant));
+  min-width: 80px;
+  flex-shrink: 0;
+  font-weight: 400;
+  letter-spacing: 0.00625rem;
+}
+
+.element-panel__field input[type="number"],
+.element-panel__field input[type="text"],
+.element-panel__field select {
+  flex: 1;
+  height: 56px;
+  padding: 0 12px;
+  border: 1px solid rgb(var(--md-outline));
+  border-radius: var(--md-shape-extra-small);
+  font-family: inherit;
+  font-size: var(--md-typescale-body-large);
+  color: rgb(var(--md-on-surface));
+  background: transparent;
+  transition: border-color var(--md-transition);
+  outline: none;
+  letter-spacing: 0.009375rem;
+  line-height: 56px;
+}
+
+.element-panel__field input[type="number"]:hover,
+.element-panel__field input[type="text"]:hover,
+.element-panel__field select:hover {
+  border-color: rgb(var(--md-on-surface));
+}
+
+.element-panel__field input[type="number"]:focus,
+.element-panel__field input[type="text"]:focus,
+.element-panel__field select:focus {
+  border-color: rgb(var(--md-primary));
+  border-width: 2px;
+  padding: 0 11px;
+}
+
+.element-panel__field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%2349454e' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 38px;
+  cursor: pointer;
+}
+
+.element-panel__field select:focus {
+  padding-right: 37px;
+}
+
+.element-panel__field input[type="color"] {
+  width: 56px;
+  height: 56px;
+  border: 1px solid rgb(var(--md-outline));
+  border-radius: var(--md-shape-extra-small);
+  padding: 4px;
+  cursor: pointer;
+  background: transparent;
+  outline: none;
+}
+
+/* Ignore-margin checkbox (keep as checkbox, not toggle) */
+.element-panel__field input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: rgb(var(--md-primary));
+  cursor: pointer;
+  margin: 0;
+}
+
+.element-panel__field--checkbox {
+  margin-bottom: var(--md-spacing-xs);
+}
+
+.element-panel__field--checkbox label {
+  display: flex;
+  align-items: center;
+  gap: var(--md-spacing-sm);
+  cursor: pointer;
+}
+
+.element-panel__field--checkbox input {
+  margin: 0;
+}
+
+/* Note text */
+.element-panel__note {
+  font-size: var(--md-typescale-body-small);
+  color: rgb(var(--md-on-surface-variant));
+  margin-left: 0;
+  margin-bottom: var(--md-spacing-sm);
+  line-height: 1.25;
+  letter-spacing: 0.00625rem;
+}
+
+/* Element instance actions */
+.element-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+
+/* Element instance separator */
+.element-separator {
+  height: 1px;
+  background: rgb(var(--md-outline-variant));
+  margin: 16px 0;
+  opacity: 0.5;
+}
+
+/* Restore section */
+.element-group--restore {
+  background: rgb(var(--md-surface-container));
+  border: 1px dashed rgb(var(--md-outline-variant));
+  border-radius: var(--md-shape-medium);
+}
+
+/* ========== Element Add Bar (顶部添加控件) ========== */
+.element-add-bar {
+  display: flex;
+  align-items: stretch;
+  gap: var(--md-spacing-sm);
+  margin-bottom: var(--md-spacing-lg);
+}
+
+.element-add-bar__select {
+  flex: 1;
+  height: 56px;
+  padding: 0 16px;
+  border: 1px solid rgb(var(--md-outline));
+  border-radius: var(--md-shape-extra-small);
+  background: transparent;
+  color: rgb(var(--md-on-surface));
+  font-family: inherit;
+  font-size: var(--md-typescale-body-large);
+  letter-spacing: 0.009375rem;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%2349454e' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+  transition: border-color var(--md-transition);
+}
+
+.element-add-bar__select:hover {
+  border-color: rgb(var(--md-on-surface));
+}
+
+.element-add-bar__select:focus {
+  border-color: rgb(var(--md-primary));
+  border-width: 2px;
+  padding: 0 15px;
+  padding-right: 39px;
+}
+
+.btn--add-module {
+  height: 56px;
+  min-width: 120px;
+  padding: 0 20px;
+  gap: 8px;
+  background: rgb(var(--md-primary));
+  color: rgb(var(--md-on-primary));
+  box-shadow: var(--md-elevation-1);
+  flex-shrink: 0;
+}
+
+.btn--add-module:hover {
+  box-shadow: var(--md-elevation-2);
+}
+
+.btn--add-module:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgb(var(--md-on-primary));
+  opacity: var(--md-state-hover);
+  border-radius: inherit;
+}
+
+.btn--add-module:active {
+  box-shadow: none;
+}
+
+.btn--add-module:active::after {
+  opacity: var(--md-state-pressed);
+}
+
+/* ========== Element Instance List ========== */
+.element-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-spacing-md);
+}
+
+/* 新增/删除动画：外层负责高度收放与淡入淡出，内层卡片保持原有样式 */
+.element-item {
+  display: grid;
+  grid-template-rows: 1fr;
+  /* backwards：入场前的首帧即处于起始态，结束后不残留 transform，避免影响浮层定位 */
+  animation: element-item-in var(--mdui-motion-duration-medium2) var(--mdui-motion-easing-emphasized-decelerate) backwards;
+}
+
+@keyframes element-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 移除：高度收起至 0 + 淡出，结束后由 React 从列表移除（时长见 ElementPanel.tsx） */
+.element-item--leaving {
+  animation: none;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  /* 抵消 .element-list 的 gap，使塌陷过程不留空洞 */
+  margin-bottom: calc(-1 * var(--md-spacing-md));
+  pointer-events: none;
+  transition:
+    grid-template-rows var(--mdui-motion-duration-medium2) var(--mdui-motion-easing-emphasized-accelerate),
+    opacity var(--mdui-motion-duration-short4) var(--mdui-motion-easing-emphasized-accelerate),
+    margin-bottom var(--mdui-motion-duration-medium2) var(--mdui-motion-easing-emphasized-accelerate);
+}
+
+/* 仅离场时裁剪，避免常态下裁剪颜色选择器等浮层 */
+.element-item--leaving .element-instance {
+  overflow: hidden;
+}
+
+.element-instance {
+  background: rgb(var(--md-surface-container-low));
+  border: 1px solid rgb(var(--md-outline-variant));
+  border-radius: var(--md-shape-medium);
+  padding: var(--md-spacing-md);
+}
+
+.element-instance__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--md-spacing-sm);
+  margin-bottom: var(--md-spacing-md);
+  padding-bottom: var(--md-spacing-sm);
+  border-bottom: 1px solid rgb(var(--md-outline-variant));
+}
+
+.element-instance__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--md-typescale-title-small);
+  font-weight: 400;
+  color: rgb(var(--md-on-surface));
+  letter-spacing: 0.00625rem;
+}
+
+.element-instance__index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--md-shape-full);
+  background: rgb(var(--md-primary-container));
+  color: rgb(var(--md-on-primary-container));
+  font-size: var(--md-typescale-label-small);
+  font-weight: 500;
+}
+
+.element-instance__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 图标按钮改用 mdui-button-icon；外观/涟漪由组件提供，此处只保留「移除」的语义色 */
+.element-instance__actions .element-icon-btn--remove {
+  color: rgb(var(--md-error));
+  --mdui-comp-ripple-state-layer-color: var(--md-error);
+}
+
+.element-instance__actions .element-icon-btn--remove svg {
+  color: rgb(var(--md-error));
+}
+
+.element-empty {
+  padding: 24px 16px;
+  text-align: center;
+  border: 1px dashed rgb(var(--md-outline-variant));
+  border-radius: var(--md-shape-medium);
+  color: rgb(var(--md-on-surface-variant));
+  font-size: var(--md-typescale-body-medium);
+}
+
+/* ========== MD3 Color Picker ========== */
+.md3-color-picker {
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+}
+
+.md3-color-picker--open {
+  z-index: 1000;
+}
+
+.md3-color-picker input,
+.md3-color-picker button {
+  font-family: inherit;
+}
+
+/* Trigger */
+.md3-color-picker__trigger {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  border: 1px solid rgb(var(--md-outline));
+  border-radius: var(--md-shape-small);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  outline: none;
+  transition: border-color var(--md-transition), box-shadow var(--md-transition), transform var(--md-transition);
+}
+
+.md3-color-picker__trigger:hover {
+  border-color: rgb(var(--md-on-surface));
+  box-shadow: var(--md-elevation-1);
+}
+
+.md3-color-picker__trigger:active {
+  transform: scale(0.92);
+}
+
+.md3-color-picker__trigger:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--md-shadow), var(--md-state-hover));
+  border-radius: inherit;
+}
+
+.md3-color-picker__trigger:focus-visible {
+  outline: 2px solid rgb(var(--md-primary));
+  outline-offset: 2px;
+}
+
+/* Popover Surface */
+.md3-color-picker__popover {
+  position: absolute;
+  z-index: 1000;
+  background: rgb(var(--md-surface-container-high));
+  border-radius: var(--md-shape-extra-large);
+  box-shadow: var(--md-elevation-3);
+  padding: var(--md-spacing-lg);
+  width: 308px;
+  animation: md3-color-picker-enter 0.25s cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+@keyframes md3-color-picker-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Saturation / Brightness Area */
+.md3-color-picker__sat-area {
+  position: relative;
+  width: 260px;
+  height: 160px;
+  border-radius: var(--md-shape-medium);
+  overflow: hidden;
+  cursor: crosshair;
+  margin-bottom: var(--md-spacing-md);
+}
+
+.md3-color-picker__sat-area canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--md-shape-medium);
+}
+
+/* Hue Slider Area */
+.md3-color-picker__hue-area {
+  position: relative;
+  width: 260px;
+  height: 20px;
+  cursor: pointer;
+  margin-bottom: var(--md-spacing-md);
+  display: flex;
+  align-items: center;
+}
+
+.md3-color-picker__hue-area canvas {
+  display: block;
+  width: 100%;
+  height: 12px;
+  border-radius: 4px;
+}
+
+/* Thumb (shared between sat & hue) */
+.md3-color-picker__thumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  transition: box-shadow 0.1s ease;
+}
+
+.md3-color-picker__sat-area:active .md3-color-picker__thumb,
+.md3-color-picker__hue-area:active .md3-color-picker__thumb {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== Mode Switcher (HEX / RGB / HSL) =====
+   使用项目自研的 .md3-toggle 胶囊切换控件，这里仅做弹层内的等宽铺满适配。 */
+.md3-cp__mode-group {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.md3-cp__mode-group .md3-toggle {
+  width: 100%;
+  /* 弹层与会话背景同为 --md-surface-container-high，加细框以便区分 */
+  border: 1px solid rgb(var(--md-outline-variant));
+}
+
+/* 三段等宽，避免短标签导致胶囊宽度参差不齐 */
+.md3-cp__mode-group .md3-toggle__option {
+  flex: 1;
+  padding: 0 0.5rem;
+}
+
+/* ===== 输入框 纯div notch 最终版 ===== */
+.md3-cp__textfield,
+.md3-cp__textfield--hex,
+.md3-cp__textfield--compact {
+  position: relative;
+  display: flex !important;        /* 强制 flex，防止被旧规则覆盖导致 # 换行 */
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  height: 40px;
+  border: none !important;         /* 容器绝不能有 border */
+  background: transparent;
+}
+.md3-cp__textfield-notch {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(var(--md-outline));   /* 全组件唯一的边框 */
+  border-radius: var(--md-shape-extra-small);
+  pointer-events: none;
+}
+.md3-cp__textfield-label {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  transform: translateY(-50%);
+  padding: 0 4px;
+  font-family: 'MiSans', system-ui, -apple-system, 'Segoe UI', sans-serif;  /* 无衬线 */
+  font-size: 0.75rem;
+  line-height: 1;
+  color: rgb(var(--md-on-surface-variant));
+  background: rgb(var(--md-surface-container-high));  /* 必须等于 popover 背景，盖住边框形成缺口 */
+  white-space: nowrap;
+}
+.md3-cp__textfield-input {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  border: none !important;
+  background: transparent;
+  outline: none;
+  padding: 0 12px;
+  font-family: 'MiSans', system-ui, -apple-system, 'Segoe UI', sans-serif;  /* 无衬线 */
+  font-size: 0.875rem;
+  color: rgb(var(--md-on-surface));
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.md3-cp__textfield-input::-webkit-outer-spin-button,
+.md3-cp__textfield-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.md3-cp__textfield-input[type="number"] {
+  text-align: center;
+}
+.md3-cp__hex-prefix {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;                  /* 不收缩不换行，和 input 同行 */
+  padding-left: 12px;
+  font-family: 'MiSans', system-ui, sans-serif;
+  font-size: 0.875rem;
+  line-height: 40px;               /* 垂直居中 */
+  color: rgb(var(--md-on-surface-variant));
+  pointer-events: none;
+}
+.md3-cp__textfield-input--hex {
+  padding-left: 4px;
+  text-transform: uppercase;
+}
+.md3-cp__textfield--hex .md3-cp__textfield-label { left: 8px; }  /* # 在框内，标签与普通字段对齐 */
+.md3-cp__textfield-input:focus ~ .md3-cp__textfield-notch {
+  border-color: rgb(var(--md-primary));
+  box-shadow: inset 0 0 0 1px rgb(var(--md-primary));
+}
+.md3-cp__textfield-input:focus ~ .md3-cp__textfield-label {
+  color: rgb(var(--md-primary));
+}
+
+/* Input row */
+.md3-cp__input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--md-spacing-sm);
+  margin-bottom: var(--md-spacing-lg);
+}
+
+.md3-cp__input-row--triple {
+  gap: 8px;
+}
+
+/* ===== Presets ===== */
+.md3-color-picker__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+}
+
+.md3-color-picker__preset {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: all var(--md-transition);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.md3-color-picker__preset:hover {
+  transform: scale(1.15);
+  box-shadow: var(--md-elevation-1);
+}
+
+.md3-color-picker__preset:focus-visible {
+  outline: 2px solid rgb(var(--md-primary));
+  outline-offset: 2px;
+}
+
+.md3-color-picker__preset--active {
+  border-color: rgb(var(--md-primary));
+  box-shadow: 0 0 0 2px rgb(var(--md-surface-container-high)), 0 0 0 3px rgb(var(--md-primary));
+  transform: scale(1.1);
+}
+
+/* ========== Presets：2×7 + MD3 合规间距 + 正圆修复 ========== */
+.md3-color-picker__presets {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;                /* MD3 spacing token：舒适档 */
+  margin-top: 16px;         /* MD3 spacing token：区段分隔 */
+}
+
+.md3-color-picker__preset {
+  box-sizing: border-box;   /* 正圆关键：border/padding 纳入 aspect-ratio */
+  width: 100%;
+  height: auto !important;  /* 覆盖旧规则残留的固定 height */
+  padding: 0 !important;    /* 清除 button 默认 padding */
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);  /* 纯白可见；border-box 下不破坏正圆 */
+  cursor: pointer;
+  transition: transform 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* MD3 state layer ↓ 这两条一直在，没删 */
+.md3-color-picker__preset:hover  { transform: scale(1.1); }
+.md3-color-picker__preset:active { transform: scale(0.92); }
+/* ========== Presets：2 行 × 7 列 + 放大（追加，覆盖旧尺寸）OVER ========== */
+/* ========== Responsive ========== */
+@media (max-width: 900px) {
+  .app__sidebar {
+    max-width: 100%;
+  }
+
+  .preset-templates__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .app__header {
+    padding: 0 var(--md-spacing-md);
+  }
+
+  /* 窄屏下标签与多选项胶囊切换控件并排会溢出（如「文字」的页码样式 4 选项），
+     改为标签独占一行、控件铺满整行、各选项等宽，避免撑破模块卡片 */
+  .element-panel__field {
+    flex-wrap: wrap;
+  }
+
+  .element-panel__field .md3-toggle {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .element-panel__field .md3-toggle__option {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 6px;
+  }
+
+  .app__footer {
+    padding: var(--md-spacing-md);
+  }
+}
+
+/* ========== Mobile (UA-detected) ========== */
+/* 手机上比例/宽度不兼容的控件在此覆盖：固定 240px 的「四边留白」改为流式 */
+html.mobile .paper-settings__outlined-field {
+  width: 100%;
+}
+
+html.mobile .paper-settings__margin-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 12px;
+}
+
+html.mobile .app__header h1 {
+  font-size: var(--md-typescale-title-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+html.mobile .app__download::part(button) {
+  padding: 0 12px;
+}
+
+/* ========== MD3 Custom Select (mdui menu, animated, non-native) ========== */
+.md3-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.md3-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 56px;
+  padding: 0 16px;
+  border: 1px solid rgb(var(--md-outline));
+  border-radius: var(--md-shape-extra-small);
+  background: transparent;
+  color: rgb(var(--md-on-surface));
+  font-family: inherit;
+  font-size: var(--md-typescale-body-large);
+  letter-spacing: 0.009375rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--md-transition);
+}
+
+.md3-select__trigger:hover {
+  border-color: rgb(var(--md-on-surface));
+}
+
+/* mdui-dropdown 展开时在宿主上反映 open 属性，据此强调边框并旋转箭头 */
+mdui-dropdown[open] .md3-select__trigger {
+  border-color: rgb(var(--md-primary));
+  border-width: 2px;
+  padding: 0 15px;
+}
+
+.md3-select__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.md3-select__chevron {
+  flex-shrink: 0;
+  color: rgb(var(--md-on-surface-variant));
+  transition: transform var(--md-transition);
+}
+
+mdui-dropdown[open] .md3-select__chevron {
+  transform: rotate(180deg);
+}
+
+/* 选项较多时菜单在内部滚动，避免超出视口；overscroll 阻断滚动链 */
+.md3-select mdui-menu {
+  max-height: min(320px, calc(100vh - 96px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ========== MD3 Custom Slider (animated, non-native) ========== */
+.md3-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  height: 44px;
+  cursor: pointer;
+  touch-action: none;
+  outline: none;
+}
+
+.md3-slider__track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  background: rgb(var(--md-surface-container-highest));
+}
+
+.md3-slider__fill {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 4px;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  background: rgb(var(--md-primary));
+}
+
+.md3-slider__thumb {
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgb(var(--md-primary));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: transform var(--md-transition), box-shadow var(--md-transition);
+}
+
+.md3-slider:active .md3-slider__thumb {
+  transform: translate(-50%, -50%) scale(1.25);
+}
+
+.md3-slider:focus-visible .md3-slider__thumb {
+  box-shadow: 0 0 0 8px rgba(var(--md-primary), 0.2);
+}
+
+/* ========== MD3 选中态：替换浏览器默认蓝色高亮 ========== */
+::selection,
+input::selection, textarea::selection, select::selection {
+  background-color: rgba(102, 80, 164, 0.35);
+  color: rgba(0, 0, 0, 0.87);
+}
+
+::-moz-selection,
+input::-moz-selection, textarea::-moz-selection, select::-moz-selection {
+  background-color: rgba(102, 80, 164, 0.35);
+  color: rgba(0, 0, 0, 0.87);
+}
+
+/* ========== MD3 Tertiary Toggle (Sliding Pill) - FIXED FOR TOUCH ========== */
+.md3-toggle {
+  position: relative; /* Essential for absolute indicator */
+  display: inline-flex;
+  align-items: center;
+  background: rgb(var(--md-surface-container-high));
+  border-radius: 9999px;
+  padding: 4px;
+  flex-shrink: 0;
+  /* Prevent touch highlight flash */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.md3-toggle--medium {
+  height: 36px;
+}
+
+.md3-toggle--small {
+  height: 32px;
+}
+
+/* The Sliding Capsule */
+.md3-toggle__indicator {
+  position: absolute;
+  top: 4px; /* Match container padding */
+  left: 0;
+  height: calc(100% - 8px); /* Container height - 2*padding */
+  background: #EADDFF; /* Secondary Container */
+  border-radius: 9999px;
+  z-index: 0; /* Behind buttons */
+  pointer-events: none; /* Don't block clicks */
+  /* 滑动胶囊动画：使用 mdui 强调减速缓动令牌，width 与 transform 同节奏，避免错位生硬感
+     首次挂载时由组件临时置为 none，避免从 0 生长 */
+  transition:
+    transform var(--mdui-motion-duration-short4) var(--mdui-motion-easing-emphasized-decelerate),
+    width var(--mdui-motion-duration-short4) var(--mdui-motion-easing-emphasized-decelerate);
+  will-change: transform, width;
+}
+
+.md3-toggle__option {
+  position: relative; /* Ensure text stays above indicator */
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 20px;
+  border: none;
+  background: transparent; /* Remove background switching from button */
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.00625rem;
+  color: rgb(var(--md-on-surface-variant));
+  border-radius: 9999px;
+  /* 文字颜色与胶囊同步过渡，避免选中瞬间文字跳变；仅过渡 color，背景由指示器负责 */
+  transition:
+    color var(--mdui-motion-duration-short3) var(--mdui-motion-easing-standard),
+    background-color var(--mdui-motion-duration-short3) var(--mdui-motion-easing-standard); 
+  white-space: nowrap;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.md3-toggle--small .md3-toggle__option {
+  padding: 0 12px;
+  font-size: 0.8125rem;
+}
+
+/* Hover state for unselected items */
+.md3-toggle__option:hover:not(.md3-toggle__option--active) {
+  color: rgb(var(--md-on-surface));
+  /* Optional: subtle hover overlay without affecting layout */
+  background: rgba(var(--md-on-surface), 0.04);
+}
+
+.md3-toggle__option:focus-visible {
+  box-shadow: 0 0 0 2px rgb(var(--md-primary));
+}
+
+/* Active state: Only change text color, background is handled by indicator */
+.md3-toggle__option--active {
+  color: rgb(var(--md-on-secondary-container));
+  background: transparent; /* Crucial: remove old background rule */
+}
