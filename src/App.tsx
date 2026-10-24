@@ -113,7 +113,12 @@ function App() {
 
       <footer className="app__footer">
         <div className="app__footer-brand">
-          <img className="app__footer-logo" src="/favicon.svg" alt="" aria-hidden="true" />
+          <img
+            className="app__footer-logo"
+            src={`${import.meta.env.BASE_URL}favicon.svg`}
+            alt=""
+            aria-hidden="true"
+          />
           <span className="app__footer-name">Datum</span>
           <span className="app__footer-version">{t('about.version')}</span>
         </div>

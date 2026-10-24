@@ -8,6 +8,8 @@
 
 <p align="center"><strong>Version 0.74</strong> · MIT License · React 19 + TypeScript + Vite 8</p>
 
+<p align="center"><a href="https://sun-yunxi.github.io/datum/"><strong>Live demo →</strong></a></p>
+
 Datum composes paper settings and element modules into a precise vector PDF. Everything runs locally in your browser — no uploads, no accounts, no server round-trips.
 
 ## Table of Contents
@@ -662,6 +664,8 @@ Thanks to the React, Vite, Zustand, pdfmake, mdui, fontkit, and qrcode projects,
 <p align="center">基于浏览器的印刷级图形方格纸生成工具。</p>
 
 <p align="center">版本 0.74 · MIT 许可证 · React 19 + TypeScript + Vite 8</p>
+
+<p align="center"><a href="https://sun-yunxi.github.io/datum/"><strong>在线使用 →</strong></a></p>
 
 Datum 将纸张设定与图形模块组合成精确的矢量 PDF。全部处理都在浏览器本地完成——不上传文件、无需账号、不经服务器周转。
 
