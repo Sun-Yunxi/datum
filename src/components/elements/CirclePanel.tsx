@@ -1,4 +1,3 @@
-﻿﻿﻿﻿
 import { useStore } from '../../store/useStore';
 import { useTranslation } from '../../i18n';
 import Md3ColorPicker from '../Md3ColorPicker';
