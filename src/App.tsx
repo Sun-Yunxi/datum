@@ -191,7 +191,7 @@ function App() {
         <div className="app__footer-brand">
           <img
             className="app__footer-logo"
-            src={`${import.meta.env.BASE_URL}favicon.svg`}
+            src={`${import.meta.env.BASE_URL}favicon.svg?v=0.75`}
             alt=""
             aria-hidden="true"
           />

@@ -200,6 +200,8 @@ input, select, textarea, button {
 .app__footer-logo {
   width: 24px;
   height: 24px;
+  display: block;
+  flex: none;
 }
 
 .app__footer-name {
