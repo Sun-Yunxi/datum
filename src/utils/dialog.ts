@@ -1,5 +1,6 @@
 import 'mdui/components/dialog.js';
 import 'mdui/components/button.js';
+import 'mdui/components/linear-progress.js';
 import type { Dialog } from 'mdui/components/dialog.js';
 import '@mdui/icons/warning.js';
 
@@ -21,7 +22,7 @@ export function showWarningDialog(headline: string, description: string) {
 
   const icon = document.createElement('mdui-icon-warning');
   icon.setAttribute('slot', 'icon');
-  icon.className = 'datum-dialog__icon';
+  icon.className = 'reglet-dialog__icon';
   dialog.appendChild(icon);
 
   dialog.addEventListener('closed', () => dialog.remove());
@@ -51,7 +52,7 @@ export function showConfirmDialog(
 
     const icon = document.createElement('mdui-icon-warning');
     icon.setAttribute('slot', 'icon');
-    icon.className = 'datum-dialog__icon';
+    icon.className = 'reglet-dialog__icon';
     dialog.appendChild(icon);
 
     let confirmed = false;
@@ -80,4 +81,81 @@ export function showConfirmDialog(
       dialog.open = true;
     });
   });
+}
+
+export interface BusyDialog {
+  /** 更新说明文字（如解析进度 3/5） */
+  setDescription: (text: string) => void;
+  /** 正常结束：关闭弹窗且不触发取消回调 */
+  complete: () => void;
+  /** 用户是否已按 Esc 或点击「取消」关闭弹窗 */
+  readonly cancelled: boolean;
+}
+
+/**
+ * 忙碌对话框：不确定样式的进度条 + 说明文字 + 取消按钮。
+ * 用于字体解析等耗时操作：点遮罩不关闭，Esc 与「取消」可关闭；
+ * 关闭后触发 onCancel，由调用方中止后续处理并丢弃未完成的数据。
+ */
+export function createBusyDialog(
+  headline: string,
+  description: string,
+  cancelText: string,
+  onCancel: () => void,
+): BusyDialog {
+  const dialog = document.createElement('mdui-dialog') as Dialog;
+  dialog.closeOnOverlayClick = false;
+  dialog.closeOnEsc = true;
+  dialog.headline = headline;
+
+  const body = document.createElement('div');
+  body.className = 'pdf-progress';
+
+  const bar = document.createElement('mdui-linear-progress');
+  // value 保持 undefined：不确定进度样式
+  const caption = document.createElement('div');
+  caption.className = 'pdf-progress__caption';
+  caption.textContent = description;
+
+  body.append(bar, caption);
+
+  const cancelBtn = document.createElement('mdui-button');
+  cancelBtn.setAttribute('slot', 'action');
+  cancelBtn.setAttribute('variant', 'text');
+  cancelBtn.textContent = cancelText;
+  cancelBtn.addEventListener('click', () => {
+    dialog.open = false;
+  });
+
+  dialog.append(body, cancelBtn);
+
+  let cancelled = false;
+  let settled = false;
+
+  dialog.addEventListener('closed', () => {
+    dialog.remove();
+    if (settled) return;
+    settled = true;
+    cancelled = true;
+    onCancel();
+  });
+
+  document.body.appendChild(dialog);
+  void dialog.updateComplete.then(() => {
+    if (!settled) dialog.open = true;
+  });
+
+  return {
+    setDescription(text: string) {
+      if (cancelled) return;
+      caption.textContent = text;
+    },
+    complete() {
+      settled = true;
+      dialog.open = false;
+    },
+    get cancelled() {
+      return cancelled;
+    },
+  };
 }

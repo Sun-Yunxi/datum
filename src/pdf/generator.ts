@@ -1,6 +1,4 @@
 import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
-import QRCode from 'qrcode';
 import type {
   PaperSettings, ElementInstance, ElementSettings, IntervalLineSettings, DiagonalSettings, DotSettings,
   SingleLineSettings, BlockSettings, CircleSettings,
@@ -9,6 +7,14 @@ import type {
 import { getPaperSize } from '../store/useStore';
 import { BUILTIN_FONT_ID } from '../types';
 import { arrayBufferToBase64 } from '../fonts';
+import { loadSarasaBase64, neededBuiltinStyles } from './sarasa';
+import type { SarasaStyle } from './sarasa';
+
+/** 二维码生成函数由调用方按需注入（qrcode 库只在存在二维码模块时加载） */
+export type QRCodeCreator = (
+  text: string,
+  options: { errorCorrectionLevel: 'M' },
+) => { modules: { size: number; get: (row: number, col: number) => number } };
 
 /** Bake opacity into image data URL using canvas (pdfmake doesn't support opacity on content images) */
 function applyImageOpacity(dataUrl: string, opacity: number): Promise<string> {
@@ -32,59 +38,85 @@ function applyImageOpacity(dataUrl: string, opacity: number): Promise<string> {
   });
 }
 
-// Initialize pdfmake fonts (本模块经动态 import 按需加载，此处仅执行一次)
-pdfMake.addVirtualFileSystem(pdfFonts);
+/** 内置 PDF 字体族（Sarasa UI SC / 更纱黑体，OFL-1.1） */
+const SARASA_FAMILY = 'Sarasa UI SC';
 
-/** 内置 MiSans：与界面 @font-face 引用同一资源文件，浏览器可复用缓存 */
-const MISANS_FAMILY = 'MiSans';
-const MISANS_URL = new URL('../MiSans/woff2/MiSans-Normal.woff2', import.meta.url).href;
+/** 各字形在 pdfmake 虚拟文件系统里的文件名 */
+const SARASA_FILES: Record<SarasaStyle, string> = {
+  regular: 'reglet-SarasaUI-Regular.bin',
+  bold: 'reglet-SarasaUI-Bold.bin',
+  italic: 'reglet-SarasaUI-Oblique.bin',
+  bolditalic: 'reglet-SarasaUI-BoldItalic.bin',
+};
 
-let misansBase64Promise: Promise<string> | null = null;
+/**
+ * 已注册进 pdfmake 的内置字形。pdfmake 的 addFonts 是浅合并（同名族整体替换），
+ * 因此每次都要把「累积到的所有字形」重新声明一遍，避免后一次导出丢掉之前注册的字形。
+ */
+const registeredBuiltinFiles: Partial<Record<SarasaStyle, string>> = {};
 
-/** 惰性加载内置 MiSans 字体（导出时才拉取，失败后允许重试） */
-function loadBuiltinFontBase64(): Promise<string> {
-  if (!misansBase64Promise) {
-    misansBase64Promise = fetch(MISANS_URL)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Failed to load built-in font: ${res.status}`);
-        return res.arrayBuffer();
-      })
-      .then(arrayBufferToBase64)
-      .catch((err) => {
-        misansBase64Promise = null;
-        throw err;
-      });
+const SARASA_STYLE_DESCRIPTORS: [SarasaStyle, string][] = [
+  ['regular', 'normal'],
+  ['bold', 'bold'],
+  ['italic', 'italics'],
+  ['bolditalic', 'bolditalics'],
+];
+
+/**
+ * 只注册实际用到的字形，不再随包加载 pdfmake 自带的 Roboto VFS（约 835KB）。
+ * 未提供的字形不能出现在字体族描述里：pdfmake 缺少对应字形时会直接抛错，
+ * 而不是自动回退到常规字形。
+ */
+function registerBuiltinFont(files: Partial<Record<SarasaStyle, string>>) {
+  Object.assign(registeredBuiltinFiles, files);
+  const vfs: Record<string, string> = {};
+  const family: Record<string, string> = {};
+  for (const [style, descriptor] of SARASA_STYLE_DESCRIPTORS) {
+    const data = registeredBuiltinFiles[style];
+    if (!data) continue;
+    vfs[SARASA_FILES[style]] = data;
+    family[descriptor] = SARASA_FILES[style];
   }
-  return misansBase64Promise;
+  pdfMake.addVirtualFileSystem(vfs);
+  // 把 pdfmake 默认的 Roboto 族名映射到同一族，避免任何遗漏的默认字体引用失效
+  pdfMake.addFonts({ [SARASA_FAMILY]: family as any, Roboto: family as any });
 }
 
 /** 把字体注册进 pdfmake：先写入虚拟文件系统，再声明字体族 */
 function registerFont(family: string, base64: string) {
-  const file = `datum-${family.replace(/[^a-zA-Z0-9]+/g, '-')}.bin`;
+  const file = `reglet-${family.replace(/[^a-zA-Z0-9]+/g, '-')}.bin`;
   pdfMake.addVirtualFileSystem({ [file]: base64 });
   pdfMake.addFonts({ [family]: { normal: file } });
 }
 
 /** 自定义字体在 pdfmake 中的字体族名（用 id 生成，避免字体族同名覆盖） */
 function customFamilyOf(fontId: string) {
-  return `Datum-${fontId}`;
+  return `Reglet-${fontId}`;
 }
 
-/** 导出失败时把所有文本节点强制回退到内置字体 */
-function forceBuiltinFont(node: any) {
+/**
+ * 自定义字体嵌入失败时，只把「自定义字体族」的文本节点改回内置字体，
+ * 并清掉加粗/斜体标记（内置字体只保证注册了常规字形，带标记会触发 pdfmake 缺少字形的异常）。
+ * 已经使用内置字体的节点保持原样，不损失其加粗/斜体效果。
+ */
+function forceBuiltinFont(node: any, customFamilies: Set<string>) {
   if (Array.isArray(node)) {
-    node.forEach(forceBuiltinFont);
+    node.forEach((n) => forceBuiltinFont(n, customFamilies));
     return;
   }
   if (node && typeof node === 'object') {
-    if ('font' in node) node.font = MISANS_FAMILY;
-    for (const key of Object.keys(node)) forceBuiltinFont(node[key]);
+    if (typeof node.font === 'string' && customFamilies.has(node.font)) {
+      node.font = SARASA_FAMILY;
+      delete node.bold;
+      delete node.italics;
+    }
+    for (const key of Object.keys(node)) forceBuiltinFont(node[key], customFamilies);
   }
 }
 
 export interface PDFResult {
   blob: Blob;
-  /** 自定义字体加载失败并自动回退到 MiSans 时为 true */
+  /** 自定义字体加载失败并自动回退到内置 Sarasa 时为 true */
   fontFallback: boolean;
 }
 
@@ -187,6 +219,52 @@ function formatPageNumber(n: number, total: number, style: PageNumberStyle, lang
   }
 }
 
+/**
+ * pdfmake 的单行文本行高 ≈ 字体自身行高比例 × 字号。
+ * Sarasa UI SC 的 (ascent - descent) / unitsPerEm ≈ 1.21，
+ * 用于把「文字块」而不是「文字块顶边」对齐到作图区域。
+ */
+const TEXT_LINE_HEIGHT_RATIO = 1.21;
+
+/**
+ * 按作图区域宽度做左/中/右对齐的绝对定位单行文本。
+ * pdfmake 的 stack 不会采用 width，alignment 会以「页面右缘」为参照，
+ * 导致居中/右对齐整体右移；这里用 columns 先把作图区域左缘留空并限定文本宽度。
+ */
+function absoluteAlignedText(opts: {
+  text: string;
+  /** 作图区域左缘距页面左缘的距离（pt） */
+  x: number;
+  /** 文本盒顶边距页面顶边的距离（pt） */
+  y: number;
+  /** 作图区域宽度（pt） */
+  width: number;
+  fontSize: number;
+  color: string;
+  align: 'left' | 'center' | 'right';
+  font: string;
+  bold?: boolean;
+  italics?: boolean;
+}) {
+  return {
+    columns: [
+      { width: opts.x, text: ' ' },
+      {
+        width: opts.width,
+        text: opts.text,
+        fontSize: opts.fontSize,
+        color: opts.color,
+        alignment: opts.align,
+        font: opts.font,
+        bold: opts.bold,
+        italics: opts.italics,
+      },
+    ],
+    columnGap: 0,
+    absolutePosition: { x: 0, y: opts.y },
+  };
+}
+
 function checkDensity(_settings: PaperSettings, elements: ElementInstance[]): string | null {
   for (const el of elements) {
     const s = el.settings;
@@ -214,59 +292,16 @@ function checkDensity(_settings: PaperSettings, elements: ElementInstance[]): st
   return null;
 }
 
-/** 导出前二次确认的图形对象数安全阈值（超过则弹窗确认，可按实测调整） */
-export const SAFE_THRESHOLD = 200000;
-
-/**
- * 粗略预估本次导出将生成的图形对象数量，用于拦截「超大范围 + 极小间距」组合，
- * 避免构建 docDefinition 时产生海量对象导致主线程长时间无响应甚至崩溃。
- */
-export function estimateDrawPrimitives(settings: PaperSettings, elements: ElementInstance[]): number {
-  const paper = getPaperDimensions(settings);
-  let total = 0;
-  for (const el of elements) {
-    const s = el.settings;
-    if (!s.enabled) continue;
-    const rw = (s as IntervalLineSettings).rangeWidth || paper.width;
-    const rh = (s as IntervalLineSettings).rangeHeight || paper.height;
-    const w = Math.min(rw, paper.width);
-    const h = Math.min(rh, paper.height);
-    switch (el.type) {
-      case 'intervalLine': {
-        const ls = s as IntervalLineSettings;
-        const sp = ls.spacing > 0 ? ls.spacing : 1;
-        total += (ls.direction === 'horizontal' ? h / sp : w / sp) + 1;
-        if (ls.frameStyle !== 'none') total += 4;
-        break;
-      }
-      case 'diagonal': {
-        const ds = s as DiagonalSettings;
-        const sp = ds.spacing > 0 ? ds.spacing : 1;
-        const dirs = ds.direction === 'both' ? 2 : 1;
-        total += (dirs * (w + h)) / sp;
-        if (ds.frameStyle !== 'none') total += 4;
-        break;
-      }
-      case 'dot': {
-        const ds = s as DotSettings;
-        const sw = ds.horizontalSpacing > 0 ? ds.horizontalSpacing : 1;
-        const sh = ds.verticalSpacing > 0 ? ds.verticalSpacing : 1;
-        total += (w / sw) * (h / sh);
-        break;
-      }
-      default:
-        total += 1;
-    }
-  }
-  return total * Math.max(1, settings.copies);
-}
-
 export function generatePDF(
   settings: PaperSettings,
   elements: ElementInstance[],
   language: Language = 'zh-hans',
   customFonts: CustomFont[] = [],
+  qrCreate?: QRCodeCreator,
 ): Promise<PDFResult> {
+  const createQRCode: QRCodeCreator = qrCreate ?? (() => {
+    throw new Error('QR code module is not loaded');
+  });
   return new Promise(async (resolve, reject) => {
     try {
       const densityError = checkDensity(settings, elements);
@@ -275,12 +310,12 @@ export function generatePDF(
         return;
       }
 
-      // 由各「文字」模块的 fontId 解析实际字体族名（缺失/非法一律回退内置 MiSans）
+      // 由各「文字」模块的 fontId 解析实际字体族名（缺失/非法一律回退内置 Sarasa）
       const customById = new Map(customFonts.map((f) => [f.id, f]));
       const familyOf = (fontId?: string) =>
         fontId && fontId !== BUILTIN_FONT_ID && customById.has(fontId)
           ? customFamilyOf(fontId)
-          : MISANS_FAMILY;
+          : SARASA_FAMILY;
 
       const paper = getPaperDimensions(settings);
       const pageWidth = mmToPt(paper.width);
@@ -310,7 +345,8 @@ export function generatePDF(
       const content: any[] = [];
       for (let copy = 0; copy < settings.copies; copy++) {
         if (copy > 0) {
-          content.push({ text: '', pageBreak: 'before' });
+          // 用空画布换页：不依赖任何字体（未使用内置字体时不会注册字体，空文本会触发字体解析）
+          content.push({ canvas: [], pageBreak: 'before' });
         }
 
         const pageNum = copy + 1;
@@ -344,6 +380,10 @@ export function generatePDF(
           if (!ts.enabled) continue;
           // 该模块选用的字体（三种模式共用）
           const tFont = familyOf(ts.fontId);
+          // 只有内置字体具备加粗/斜体字形；自定义字体按上传文件的字形原样嵌入
+          const tBuiltin = tFont === SARASA_FAMILY;
+          const tBold = tBuiltin && ts.bold;
+          const tItalics = tBuiltin && ts.italic;
 
           const tMarginL = isOdd ? marginL : marginLEven;
           const tMarginT = isOdd ? marginT : marginTEven;
@@ -363,17 +403,21 @@ export function generatePDF(
 
             const tfMarginPt = mmToPt(tf.margin);
             const tfFontSize = mmToPt(tf.fontSize);
+            // 单行文本盒高度：用于按「文字块」对齐，避免整体向下偏一行高
+            const tfLineHeight = tfFontSize * TEXT_LINE_HEIGHT_RATIO;
             const displayText = tf.text;
             const drawingAreaWidth = pageWidth - tMarginL - tMarginR;
             const drawingAreaHeight = pageHeight - tMarginT - tMarginB;
 
             let posY: number;
             switch (tf.verticalPosition) {
-              // 顶端/底端加安全钳制，避免文本超出页面而被 pdfmake 挤到下一页
-              case 'top': posY = Math.max(0, tMarginT - tfMarginPt); break;
-              case 'bottom': posY = Math.min(pageHeight - tMarginB + tfMarginPt, pageHeight - tfFontSize * 1.4); break;
+              // 文字块整体位于作图区域上方，与区域上缘保持 margin 的间距
+              case 'top': posY = Math.max(0, tMarginT - tfMarginPt - tfLineHeight); break;
+              // 文字块整体位于作图区域下方；行底贴页面底边会因浮点误差被挤到下一页，故留 1pt 余量
+              case 'bottom': posY = Math.min(Math.max(0, pageHeight - tfLineHeight - 1), pageHeight - tMarginB + tfMarginPt); break;
+              // 文字块在作图区域内垂直居中
               case 'middle':
-              default: posY = tMarginT + drawingAreaHeight / 2; break;
+              default: posY = tMarginT + drawingAreaHeight / 2 - tfLineHeight / 2; break;
             }
 
             if (tf.direction === 'vertical') {
@@ -390,19 +434,22 @@ export function generatePDF(
                 color: ts.color,
                 angle: 90,
                 font: tFont,
+                bold: tBold,
+                italics: tItalics,
               });
             } else {
-              content.push({
-                stack: [{
-                  text: displayText,
-                  fontSize: tfFontSize,
-                  color: ts.color,
-                  alignment: hAlignMap[tf.horizontalPosition],
-                  font: tFont,
-                }],
-                absolutePosition: { x: tMarginL, y: posY },
+              content.push(absoluteAlignedText({
+                text: displayText,
+                x: tMarginL,
+                y: posY,
                 width: drawingAreaWidth,
-              });
+                fontSize: tfFontSize,
+                color: ts.color,
+                align: hAlignMap[tf.horizontalPosition],
+                font: tFont,
+                bold: tBold,
+                italics: tItalics,
+              }));
             }
             continue;
           }
@@ -424,25 +471,27 @@ export function generatePDF(
             const displayNumber = pn.startNumber + (pageNum - pn.startDisplayPage);
             const displayText = formatPageNumber(displayNumber, totalPages, pn.style, language);
             const pnFontSize = mmToPt(pn.fontSize);
+            const pnLineHeight = pnFontSize * TEXT_LINE_HEIGHT_RATIO;
             const edgePt = mmToPt(PAGE_NUMBER_EDGE_MM);
             const drawingAreaWidth = pageWidth - tMarginL - tMarginR;
-            // 页眉/页脚均以「距页边固定距离」定位，页脚再按字号回退，
+            // 页眉/页脚均以「距页边固定距离」定位，页脚再按行高回退，
             // 保证文本框不超出页面高度（否则 pdfmake 会把它挤到下一页）
             const posY = pn.placement === 'header'
               ? edgePt
-              : pageHeight - edgePt - pnFontSize;
+              : pageHeight - edgePt - pnLineHeight;
 
-            content.push({
-              stack: [{
-                text: displayText,
-                fontSize: pnFontSize,
-                color: ts.color,
-                alignment: hAlignMap[pn.align],
-                font: tFont,
-              }],
-              absolutePosition: { x: tMarginL, y: posY },
+            content.push(absoluteAlignedText({
+              text: displayText,
+              x: tMarginL,
+              y: posY,
               width: drawingAreaWidth,
-            });
+              fontSize: pnFontSize,
+              color: ts.color,
+              align: hAlignMap[pn.align],
+              font: tFont,
+              bold: tBold,
+              italics: tItalics,
+            }));
             continue;
           }
 
@@ -468,6 +517,8 @@ export function generatePDF(
               color: ts.color,
               angle: st.angle,
               font: tFont,
+              bold: tBold,
+              italics: tItalics,
             });
           }
         }
@@ -621,7 +672,7 @@ export function generatePDF(
                 const qs = s as QRCodeSettings;
                 const qrSize = mmToPt(qs.size);
                 try {
-                  const qr = QRCode.create(qs.content, { errorCorrectionLevel: 'M' });
+                  const qr = createQRCode(qs.content, { errorCorrectionLevel: 'M' });
                   const moduleCount = qr.modules.size;
                   const moduleSize = qrSize / moduleCount;
 
@@ -668,16 +719,44 @@ export function generatePDF(
         content,
       };
 
-      // 字体：内置 MiSans 始终注册（作为默认与回退）；各「文字」模块按 settings.fontId
-      // 使用自定义字体（customFonts 已由调用方过滤为实际用到的字体）
-      // 内置 MiSans：pdfmake 的 VFS 只接受 base64 字符串（内部会 new Buffer(data,'base64')
+      // 字体：只注册本次实际用到的内置字形（未选择字体/选择内置/自定义字体失效都会回退内置）；
+      // 全部文字模块都使用自定义字体时不下载任何内置字体文件。
+      // （customFonts 已由调用方过滤为实际用到的字体）
+      // pdfmake 的 VFS 只接受 base64 字符串（内部会 new Buffer(data,'base64')
       // 解码为二进制），不支持直接写入 ArrayBuffer/Uint8Array；此处复用缓存的同一个字符串引用，
       // 不做任何拼接或拷贝
-      registerFont(MISANS_FAMILY, await loadBuiltinFontBase64());
+      //
+      // 只注册本次实际用到的字形（常规/加粗/斜体/加粗斜体）：pdfmake 在缺少对应字形时
+      // 会直接抛错而不是回退，所以未用到的字形不能出现在字体族描述里。
+      const builtinStyles = neededBuiltinStyles(elements, customFonts);
+      const ensureBuiltinFont = async (styles: SarasaStyle[]) => {
+        // 已注册过（含之前几次导出注册的）字形无需重复处理
+        const missing = styles.filter((s) => !registeredBuiltinFiles[s]);
+        if (missing.length === 0) return;
+        const loaded = await Promise.all(
+          missing.map(async (s) => [s, await loadSarasaBase64(s)] as const),
+        );
+        const files: Partial<Record<SarasaStyle, string>> = {};
+        for (const [s, data] of loaded) files[s] = data;
+        registerBuiltinFont(files);
+      };
+      if (builtinStyles.length > 0) {
+        await ensureBuiltinFont(builtinStyles);
+        docDef.defaultStyle = { font: SARASA_FAMILY };
+      } else if (customFonts.length > 0) {
+        // 全部文本都使用自定义字体：默认样式也指向其中一个已注册的字体族
+        docDef.defaultStyle = { font: customFamilyOf(customFonts[0].id) };
+      }
       // 自定义字体：store 中仅保存原始二进制（ArrayBuffer），此处临时转 base64 注入 VFS；
-      // 该 base64 为局部临时字符串，generatePDF 结束后即可被 GC 回收
-      for (const f of customFonts) registerFont(customFamilyOf(f.id), arrayBufferToBase64(f.data));
-      docDef.defaultStyle = { font: MISANS_FAMILY };
+      // 该 base64 为局部临时字符串，generatePDF 结束后即可被 GC 回收。
+      // 单个字体注册/转换失败不影响其它字体，异常留到生成阶段统一处理（走回退路径）。
+      for (const f of customFonts) {
+        try {
+          registerFont(customFamilyOf(f.id), arrayBufferToBase64(f.data));
+        } catch {
+          /* 交给下面的嵌入异常回退 */
+        }
+      }
 
       let fontFallback = false;
       let blob: Blob;
@@ -685,8 +764,11 @@ export function generatePDF(
         blob = await pdfMake.createPdf(docDef).getBlob();
       } catch (err) {
         if (customFonts.length === 0) throw err;
-        // 自定义字体嵌入异常：整体回退内置 MiSans
-        forceBuiltinFont(content);
+        // 自定义字体嵌入异常：把「自定义字体族」的文本整体回退到内置字体（此时才下载常规字形）。
+        // 已使用内置字体的节点保持原样，其加粗/斜体效果不会被丢掉。
+        await ensureBuiltinFont(['regular']);
+        docDef.defaultStyle = { font: SARASA_FAMILY };
+        forceBuiltinFont(content, new Set(customFonts.map((f) => customFamilyOf(f.id))));
         blob = await pdfMake.createPdf(docDef).getBlob();
         fontFallback = true;
       }
@@ -698,7 +780,7 @@ export function generatePDF(
   });
 }
 
-export function downloadPDF(blob: Blob, filename: string = 'datum.pdf') {
+export function downloadPDF(blob: Blob, filename: string = 'reglet.pdf') {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;

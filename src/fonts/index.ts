@@ -9,6 +9,9 @@ export const FONT_ACCEPT = '.woff2,.ttf,.otf';
 /** 字体文件大小上限：50MB */
 export const MAX_FONT_SIZE = 50 * 1024 * 1024;
 
+/** 单次批量上传的总大小提示阈值：25MB（超过时弹出一次警告） */
+export const MAX_BATCH_SIZE = 25 * 1024 * 1024;
+
 /** 字体读取 / 解析超时：20s */
 export const FONT_LOAD_TIMEOUT = 20000;
 

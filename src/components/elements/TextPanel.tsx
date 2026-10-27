@@ -12,6 +12,32 @@ import type {
 } from '../../types';
 
 /**
+ * 字体样式（加粗 / 斜体）：紧跟在字体选择/上传框下方，三种模式共用同一份设置。
+ * 内置字体按组合选择对应字形（仅斜体时倾斜 Regular）；自定义字体按上传文件原样输出。
+ */
+function TextStyleFields({
+  bold, italic, onChange,
+}: {
+  bold: boolean;
+  italic: boolean;
+  onChange: (patch: { bold: boolean } | { italic: boolean }) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <>
+      <div className="element-panel__field">
+        <label className="element-panel__label">{t('elements.bold')}</label>
+        <Md3Switch checked={bold} onChange={(v) => onChange({ bold: v })} />
+      </div>
+      <div className="element-panel__field">
+        <label className="element-panel__label">{t('elements.italic')}</label>
+        <Md3Switch checked={italic} onChange={(v) => onChange({ italic: v })} />
+      </div>
+    </>
+  );
+}
+
+/**
  * 整合后的「文字」模块面板：
  * 在一个模块内通过「切换模式」在 标题 / 页码 / 单文字 三种模式间切换，
  * 颜色与启用状态三种模式共用，其余字段按模式分组、各自独立记忆。
@@ -86,6 +112,11 @@ export default function TextPanel({ instance }: { instance: ElementInstance }) {
           </div>
 
           <FontSelect value={settings.fontId} onChange={(v) => update({ fontId: v })} />
+          <TextStyleFields
+            bold={settings.bold}
+            italic={settings.italic}
+            onChange={(patch) => update(patch)}
+          />
 
           <div className="element-panel__field">
             <label className="element-panel__label">{t('elements.direction')}</label>
@@ -163,6 +194,11 @@ export default function TextPanel({ instance }: { instance: ElementInstance }) {
           </div>
 
           <FontSelect value={settings.fontId} onChange={(v) => update({ fontId: v })} />
+          <TextStyleFields
+            bold={settings.bold}
+            italic={settings.italic}
+            onChange={(patch) => update(patch)}
+          />
 
           <div className="element-panel__field">
             <label className="element-panel__label">{t('elements.pageNumberStyle')}</label>
@@ -314,6 +350,11 @@ export default function TextPanel({ instance }: { instance: ElementInstance }) {
           </div>
 
           <FontSelect value={settings.fontId} onChange={(v) => update({ fontId: v })} />
+          <TextStyleFields
+            bold={settings.bold}
+            italic={settings.italic}
+            onChange={(patch) => update(patch)}
+          />
 
           <div className="element-panel__field">
             <label className="element-panel__label">{t('elements.angle')}</label>

@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: Build with base path
-        run: npm run build -- --base=/datum/
+        run: npm run build -- --base=/reglet/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

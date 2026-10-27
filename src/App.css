@@ -1,20 +1,6 @@
-/* ========== MiSans Local Fonts ==========
-   仅声明界面实际使用的字重（400 常规 / 500 中黑）：
-   未使用的 600/700 字重已移除，避免把整份 CJK 字体打进产物（每个约 4.9MB）。 */
-@font-face {
-  font-family: 'MiSans';
-  src: url('./MiSans/woff2/MiSans-Normal.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'MiSans';
-  src: url('./MiSans/woff2/MiSans-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
+/* 界面字体：使用 CSS Fonts Module Level 4 的 system-ui 关键字，
+   不加载任何 Web 字体文件，确保首屏极速渲染。
+   PDF 导出所用字体（Sarasa UI SC）仅在导出时按需加载。 */
 
 /* ========== Material Design 3 Design Tokens ========== */
 :root {
@@ -110,7 +96,7 @@
 }
 
 body {
-  font-family: "MiSans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: var(--md-typescale-body-medium);
   line-height: 1.2;
   color: rgb(var(--md-on-surface));
@@ -240,6 +226,14 @@ input, select, textarea, button {
   color: rgb(var(--md-on-surface-variant));
 }
 
+/* 页脚最底部的小字说明（系统字体与版权提示） */
+.app__footer-note {
+  max-width: 720px;
+  font-size: var(--md-typescale-label-small);
+  color: rgb(var(--md-on-surface-variant));
+  line-height: 1.5 !important;
+}
+
 /* 「添加模块」按钮：与左侧下拉框等高（56px） */
 .element-add-bar__btn {
   height: 56px;
@@ -300,6 +294,32 @@ input, select, textarea, button {
 }
 
 /* ========== Font Select（「文字」模块内的字体选择控件） ========== */
+/* 拖拽上传热区：悬停/拖入文件时高亮边框 */
+.font-select__drop {
+  padding: var(--md-spacing-sm);
+  margin: calc(-1 * var(--md-spacing-sm)) 0;
+  border: 1px dashed transparent;
+  border-radius: var(--md-shape-small);
+  transition: border-color var(--md-transition), background-color var(--md-transition);
+}
+
+.font-select__drop.is-dragging {
+  border-color: rgb(var(--md-primary));
+  background: rgba(var(--md-primary), 0.08);
+}
+
+.font-select__drop-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.font-select__drop-hint {
+  margin: 2px 0 0;
+  font-size: var(--md-typescale-label-small);
+  color: rgb(var(--md-on-surface-variant));
+  line-height: 1.4;
+}
+
 /* 隐私提示小字：与「选择文件」按钮同行，占据左侧剩余空间 */
 .font-select__privacy {
   flex: 1;
@@ -353,8 +373,28 @@ input, select, textarea, button {
 }
 
 /* 字体加载失败提示对话框顶部的 warning 图标（@mdui/icons） */
-.datum-dialog__icon {
+.reglet-dialog__icon {
   color: rgb(var(--md-error));
+}
+
+/* PDF 导出进度弹窗：进度条 + 进度说明文字 */
+.pdf-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-spacing-sm);
+  width: min(320px, 70vw);
+  padding-block: var(--md-spacing-sm);
+}
+
+.pdf-progress mdui-linear-progress {
+  width: 100%;
+}
+
+.pdf-progress__caption {
+  font-size: var(--md-typescale-label-small);
+  color: rgb(var(--md-on-surface-variant));
+  /* 数字等宽，避免百分比跳动时文字左右抖动 */
+  font-variant-numeric: tabular-nums;
 }
 
 /* ========== Snackbar（轻量消息提示） ========== */
@@ -1117,7 +1157,7 @@ mdui-snackbar {
   left: 12px;
   transform: translateY(-50%);
   padding: 0 4px;
-  font-family: 'MiSans', system-ui, -apple-system, 'Segoe UI', sans-serif;  /* 无衬线 */
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;  /* 无衬线 */
   font-size: 0.75rem;
   line-height: 1;
   color: rgb(var(--md-on-surface-variant));
@@ -1135,7 +1175,7 @@ mdui-snackbar {
   background: transparent;
   outline: none;
   padding: 0 12px;
-  font-family: 'MiSans', system-ui, -apple-system, 'Segoe UI', sans-serif;  /* 无衬线 */
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;  /* 无衬线 */
   font-size: 0.875rem;
   color: rgb(var(--md-on-surface));
   -moz-appearance: textfield;
@@ -1154,7 +1194,7 @@ mdui-snackbar {
   z-index: 2;
   flex: 0 0 auto;                  /* 不收缩不换行，和 input 同行 */
   padding-left: 12px;
-  font-family: 'MiSans', system-ui, sans-serif;
+  font-family: system-ui, sans-serif;
   font-size: 0.875rem;
   line-height: 40px;               /* 垂直居中 */
   color: rgb(var(--md-on-surface-variant));

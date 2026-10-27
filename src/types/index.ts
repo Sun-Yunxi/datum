@@ -219,6 +219,8 @@ export interface TextSettings {
   mode: TextMode;
   color: string;                 // 三种模式共用
   fontId: string;                // 三种模式共用：BUILTIN_FONT_ID 或自定义字体 id
+  bold: boolean;                 // 三种模式共用：仅内置字体有对应字形；自定义字体按上传文件原样使用
+  italic: boolean;               // 三种模式共用：内置字体使用斜体字形（Regular 斜切得到）
   title: TitleBlockSettings;
   single: SingleTextBlockSettings;
   pageNumber: PageNumberBlockSettings;
@@ -267,8 +269,8 @@ export interface CustomFont {
   data: ArrayBuffer; // 字体原始二进制（不再常驻 base64，避免约 1.33 倍内存膨胀；仅在导出时临时转 base64）
 }
 
-/** 内置 MiSans 的字体 id */
-export const BUILTIN_FONT_ID = 'misans';
+/** 内置字体（PDF 导出用 Sarasa UI SC；界面使用系统字体）的字体 id */
+export const BUILTIN_FONT_ID = 'builtin';
 
 // ========== 语言 ==========
 export type Language = 'en' | 'zh-hans';

@@ -9,8 +9,8 @@ const require = createRequire(import.meta.url)
 
 /**
  * 构建期法律声明插件：
- * 1. 把内置 MiSans 字体的许可协议（src/MiSans/LICENSE-MiSans.txt）随产物输出到 dist/，
- *    满足协议第 3 条第 4 项「在字体的任何副本中保留版权声明和本协议」；
+ * 1. 把内置 PDF 字体 Sarasa UI SC 的许可协议（src/Sarasa/LICENSE-Sarasa.txt）随产物输出到 dist/，
+ *    满足 SIL OFL 1.1 关于「随字体副本一并保留版权声明与本协议」的要求；
  * 2. 自动收集运行时依赖（含传递依赖）的 LICENSE 文本，生成 dist/THIRD-PARTY-NOTICES.txt。
  */
 function legalNotices(): Plugin {
@@ -108,8 +108,8 @@ function legalNotices(): Plugin {
       '列出本项目的运行时依赖（含传递依赖）及其许可协议全文。',
       '各依赖版权归其各自作者所有，使用条件以其许可协议为准。',
       '',
-      '内置 MiSans 字体不在本文件范围内：其遵循《MiSans 字体知识产权许可协议》，',
-      '协议原文见同目录下的 LICENSE-MiSans.txt。',
+      '本项目仅在 PDF 导出时内置 Sarasa UI SC（Regular）字体，不在本文件范围内：',
+      '其遵循 SIL Open Font License 1.1，协议原文见同目录下的 LICENSE-Sarasa.txt。',
       '='.repeat(72),
       '',
       '',
@@ -119,20 +119,20 @@ function legalNotices(): Plugin {
   }
 
   return {
-    name: 'datum:legal-notices',
+    name: 'reglet:legal-notices',
     apply: 'build',
     configResolved(config) {
       root = config.root
       outDir = config.build.outDir
     },
     generateBundle() {
-      const licensePath = join(root, 'src', 'MiSans', 'LICENSE-MiSans.txt')
+      const licensePath = join(root, 'src', 'Sarasa', 'LICENSE-Sarasa.txt')
       if (!existsSync(licensePath)) {
-        this.error(`缺少 MiSans 许可协议文件：${licensePath}（协议要求随字体副本保留）`)
+        this.error(`缺少 Sarasa 字体许可协议文件：${licensePath}（OFL 要求随字体副本保留）`)
       }
       this.emitFile({
         type: 'asset',
-        fileName: 'LICENSE-MiSans.txt',
+        fileName: 'LICENSE-Sarasa.txt',
         source: readFileSync(licensePath, 'utf8'),
       })
     },

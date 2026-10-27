@@ -108,6 +108,8 @@ function createDefaultElement(type: ElementType, id: string): ElementInstance {
           mode: 'title' as const,
           color: '#000000',
           fontId: BUILTIN_FONT_ID,
+          bold: false,
+          italic: false,
           title: {
             text: 'Title',
             fontSize: 10,
@@ -284,7 +286,7 @@ export const useStore = create<AppState>((set) => ({
   customFonts: [],
   addCustomFont: (font) =>
     set((state) => ({ customFonts: [...state.customFonts, font] })),
-  // 移除字体：把仍在引用它的文字模块统一回退到内置 MiSans
+  // 移除字体：把仍在引用它的文字模块统一回退到内置字体
   removeCustomFont: (id) =>
     set((state) => ({
       customFonts: state.customFonts.filter((f) => f.id !== id),

@@ -12,6 +12,6 @@ RUN npm run build
 # 运行阶段：仅保留静态产物
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
-# dist 内已包含 LICENSE-MiSans.txt 与 THIRD-PARTY-NOTICES.txt（由 vite 构建插件生成），
-# 随镜像一同分发，满足 MiSans 协议「在字体的任何副本中保留版权声明和本协议」的要求
+# dist 内已包含 LICENSE-Sarasa.txt 与 THIRD-PARTY-NOTICES.txt（由 vite 构建插件生成），
+# 随镜像一同分发，满足 SIL OFL 1.1「随字体副本保留版权声明与本协议」的要求
 EXPOSE 80
